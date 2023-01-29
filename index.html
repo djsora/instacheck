@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Instacheck</title>
+    <link href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" rel="stylesheet">
+</head>
+<body>
+    <h1>Instacheck</h1>
+    <p>Сначала нажми <b>COPY LIST</b> в штуке, а затем нажми <b>ВСТАВИТЬ</b>.</p>
+    <textarea id="main"></textarea>
+    <button id="paste">ВСТАВИТЬ</button>
+    <button id="clear">ОЧИСТИТЬ</button>
+
+    <script>
+        const main = document.getElementById("main");
+        const paste = document.getElementById("paste");
+        const clear = document.getElementById("clear");
+        main.disabled = true;
+
+        let loaded = window.localStorage.getItem('data');
+        if (loaded) {
+            loaded = JSON.parse(loaded);
+        } else {
+            loaded = [];
+        }
+
+        console.log(loaded);
+
+        paste.addEventListener('click', async () => {
+            try {
+                let input = (await navigator.clipboard.readText()).split("\r\n");
+                console.log('Text pasted.');
+
+                let difference = input.filter(x => !loaded.includes(x));
+
+                let value = "";
+
+                if (difference.length > 0) {
+                    value = `Новые отписчики: ${difference.join(', ')}`;
+                } else {
+                    value = "Нет новых отписчиков! <3";
+                }
+
+                main.value = value;
+
+                loaded.push(...difference);
+
+                window.localStorage.setItem('data', JSON.stringify(loaded));
+            } catch (error) {
+                console.log('Failed to read clipboard');
+            }
+        });
+
+        clear.addEventListener('click', async () => {
+            window.localStorage.clear();
+        });
+    </script>
+</body>
+</html>
